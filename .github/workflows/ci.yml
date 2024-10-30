@@ -25,10 +25,7 @@ jobs:
       - name: Run Infinity script
         run: |
           chmod +x ./Infinity
-          for Dir in ./Build; do
-            if [ -d "$Dir" ]; then
-              echo "Building in directory: $dir"
-              chmod +x ./Infinity
-              ./Infinity build "$Dir"
-            fi
+          for Dir in ./Build/*; 
+            ./Infinity build "$Dir"
+          fi
           done
