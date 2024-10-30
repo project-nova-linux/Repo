@@ -25,6 +25,7 @@ jobs:
       - name: Run Infinity script
         run: |
           chmod +x ./Infinity
+          ls
           for Dir in ./Build/*; do 
             ./Infinity build "$Dir"
           done
