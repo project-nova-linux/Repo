@@ -1,0 +1,117 @@
+#!/bin/bash
+
+helpPlz() {
+  echo "help: Display this screen"
+  echo "template: Set up templates"
+  echo "build: Start building packages"
+}
+
+templateHelpPlz() {
+  echo "help: Display this screen"
+  echo "basic: Basic template"
+}
+
+basictemplatePlz() {
+  echo "$1"
+  if [ -z "$1" ]; then
+    echo "No directory provided"
+    exit 1
+  fi
+  mkdir -p "$1"
+  cat << EOF > "$1/Build.info"
+[BuildInfo]
+Type = Basic
+Module = <Please fill in module>
+Version = <Please fill in version>
+Active = <Please fill in Active>
+EOF
+}
+
+templatePlz() {
+  case $1 in
+    basic)
+      shift 1; basictemplatePlz "$@"
+      ;;
+    *)
+      templateHelpPlz
+      ;;
+  esac
+}
+
+buildPlz() {
+  local arg=$1
+  python3 -c '
+import sys
+Arg=sys.argv
+
+if len(Arg) <= 1:
+  print("No arguments passed")
+  exit(1)
+
+Arg = Arg[1]
+
+import configparser
+import os
+
+print(f"Building in directory {Arg}")
+
+Config = None
+
+def InitConfig():
+  global Config
+  if Config is None:
+    if not os.path.isfile(f"{Arg}/Build.info"):
+      print("Error: no config found!")
+      exit(1)
+    else:
+      Config = configparser.ConfigParser()
+      Config.read(f"{Arg}/Build.info")
+
+def ResolveConfig(Section, Option):
+  try:
+    return Config.get(Section, Option)
+  except (configparser.NoOptionError, configparser.NoSectionError):
+    print(f"Error: missing required configuration '{Option}' in section '{Section}'.")
+    exit(1)
+
+InitConfig()
+Type = ResolveConfig("BuildInfo", "Type")
+Module = ResolveConfig("BuildInfo", "Module")
+Version = ResolveConfig("BuildInfo", "Version")
+Active = ResolveConfig("BuildInfo", "Active")
+
+if Active != "True" and Active != "False":
+  print(f"Active should be True or False, active is {Active} instead")
+  exit(1)
+
+if not os.path.isfile(f"{Arg}/{Module}"):
+  print(f"Module {Module} not found")
+  exit(1)
+
+if Type != "Basic":
+  print(f"Invalid type {Type}")
+  exit(1)
+
+import subprocess
+try:
+  Result = subprocess.run([f"cd {Arg} && ./{Module}"], check=True, capture_output=True, text=True)
+except subprocess.CalledProcessError as e:
+  print("Error running Build.sh:")
+  print(e.stderr)
+  exit(1)
+
+' $arg
+}
+
+case $1 in
+  template)
+    shift 1; templatePlz "$@"
+    ;;
+  build)
+    shift 1; buildPlz "$@"
+    ;;
+  *)
+    helpPlz
+    ;;
+esac
+

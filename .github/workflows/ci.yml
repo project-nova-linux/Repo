@@ -1,0 +1,25 @@
+name: Building package automation 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12.3' 
+
+      - name: Run Infinity script
+        run: |
+          chmod +x ./Infinity
+          for Dir in ./Build; do
+            if [ -d "$Dir" ]; then
+              echo "Building in directory: $dir"
+              chmod +x ./Infinity
+              ./Infinity build "$Dir"
+            fi
+          done

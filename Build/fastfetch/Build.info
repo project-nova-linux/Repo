@@ -1,0 +1,5 @@
+[BuildInfo]
+Type = Basic
+Module = Build.sh
+Version =
+Active = True
