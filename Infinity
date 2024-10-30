@@ -93,8 +93,10 @@ if Type != "Basic":
   exit(1)
 
 import subprocess
+import os
 try:
-  Result = subprocess.run([f"cd {Arg} && ./{Module}"], check=True, capture_output=True, text=True)
+  os.chdir(Arg)
+  Result = subprocess.run([f"./{Module}"], check=True, capture_output=True, text=True)
 except subprocess.CalledProcessError as e:
   print("Error running Build.sh:")
   print(e.stderr)
