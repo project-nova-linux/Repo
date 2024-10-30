@@ -29,4 +29,3 @@ jobs:
           for Dir in ./Build/*; do 
             ./Infinity build "$Dir"
           done
-          done
